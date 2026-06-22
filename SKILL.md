@@ -124,7 +124,7 @@ return { results: results.filter(Boolean) }
 
 ### 模板 3：Pipeline（无屏障）
 
-**适用条件**：每个单元需经多阶段处理，但不等所有单元完成阶段 1 再进阶段 2。
+**适用条件**：每个单元需经多阶段处理，且各阶段间**不需要跨单元聚合**（无去重、无排序、无过滤阈值）。选 T3 还是 T4 的判据：阶段切换时是否需要拿到**所有单元的结果**才能继续？不需要 → T3，需要 → T4。
 
 ```javascript
 export const meta = {
@@ -149,7 +149,7 @@ return results
 
 ### 模板 4：Pipeline with Barrier
 
-**适用条件**：需等所有单元完成阶段 1 后，在全局结果上操作（去重/过滤/排序），再进入阶段 2。
+**适用条件**：阶段间存在**跨单元的聚合操作**——去重、排序、按阈值过滤、取 Top-N 等，这些操作必须拿到所有单元的阶段 1 结果才能执行。如果只是每个单元各自处理完继续下一阶段，用 T3。
 
 ```javascript
 export const meta = {
@@ -192,19 +192,40 @@ export const meta = {
 }
 
 phase('循环发现')
-const all = new Set()
+const found = []        // 存结构化对象，用于去重和传给下一轮
+const seen = new Set()  // 对关键字段去重，不对整段文本去重
 let dryRuns = 0
-while (dryRuns < 2) {
+while (dryRuns < 2 && (!budget.total || budget.remaining() > 50_000)) {
   const batch = await agent(
-    `【搜索任务描述】\n已有 ${all.size} 个: ${[...all].join(', ')}`,
-    { phase: '循环发现' }
+    `【搜索任务描述】\n已发现 ${found.length} 个: ${found.map(x => x.key).join(', ')}\n\n返回本轮新发现，若无新发现返回空数组。`,
+    {
+      phase: '循环发现',
+      schema: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                key: { type: 'string' },   // 用于去重的唯一标识（名称/ID/URL）
+                data: { type: 'string' },  // 其余详情
+              },
+              required: ['key'],
+            },
+          },
+        },
+        required: ['items'],
+      },
+    }
   )
-  if (!batch || batch.trim().length === 0) { dryRuns++; continue }
+  const newItems = (batch?.items ?? []).filter(x => x.key && !seen.has(x.key))
+  if (newItems.length === 0) { dryRuns++; continue }
   dryRuns = 0
-  all.add(batch.trim())
-  log(`已找到 ${all.size} 个`)
+  newItems.forEach(x => { seen.add(x.key); found.push(x) })
+  log(`已找到 ${found.length} 个`)
 }
-return { results: [...all] }
+return { results: found }
 ```
 
 ---
@@ -228,11 +249,19 @@ const findings = await agent('【提取/生成结论】', {phase: '发现'})
 
 phase('验证')
 const votes = await parallel(Array.from({length: 3}, (_, i) => () =>
-  agent(`验证者 ${i+1}，尝试反驳:\n${findings}\n\n不确定就说"驳回"`, {
+  agent(`验证者 ${i+1}，尝试反驳以下结论。若能找到有效反驳，verdict 填 "reject"；若无法反驳，verdict 填 "pass"。\n\n结论:\n${findings}`, {
     phase: '验证',
+    schema: {
+      type: 'object',
+      properties: {
+        verdict: { type: 'string', enum: ['pass', 'reject'] },
+        reason: { type: 'string' },
+      },
+      required: ['verdict', 'reason'],
+    },
   })
 ))
-const passed = votes.filter(Boolean).filter(v => v.includes('通过')).length >= 2
+const passed = votes.filter(Boolean).filter(v => v.verdict === 'pass').length >= 2
 return { findings, verdict: passed ? '通过' : '驳回' }
 ```
 
@@ -320,5 +349,6 @@ Workflow 返回的 `result` 字段包含脚本的 return 值。
 | **子代理权限** | 不能 Read 主会话本地文件；可以跑 Bash |
 | **最大并发** | ~10 个 agent 同时运行 |
 | **每 Workflow** | 最多 1000 个 agent 调用 |
+| **budget** | T5 等开放循环必须加 budget guard：`while (dryRuns < 2 && (!budget.total \|\| budget.remaining() > 50_000))`；budget 耗尽时已收集结果仍可 return，不会丢失 |
 | **失败处理** | agent 返回 null，脚本需 filter(Boolean)；Workflow 报错则修正重试 |
 | **详细 API 参考** | 见 `references/workflow-runtime-api.md` 和 `references/workflow-tool-api.md` |
