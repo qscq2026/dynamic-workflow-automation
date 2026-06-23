@@ -60,6 +60,48 @@ skill 会自动分析任务并选择其中一种：
 | **T6 对抗验证** | 多个独立 agent 尝试反驳同一结论，投票决定通过与否 | `parallel` + schema 投票 |
 | **T7 评判小组** | 多视角生成方案，独立评审，综合选最优 | `parallel` × 2 + 综合 `agent` |
 
+### T1 — Fan-Out + 汇聚
+
+![T1 Fan-Out + 汇聚](assets/t1_fanout_merge.svg)
+
+N 个独立单元同时处理，全部完成后由一个汇聚 agent 合成一份综合报告。最常用模式。
+
+### T2 — Fan-Out 各自输出
+
+![T2 Fan-Out 各自输出](assets/t2_fanout_individual.svg)
+
+N 个独立单元同时处理，结果各自保留，无汇聚步骤。与 T1 的唯一区别是省略了最后的合并 agent。
+
+### T3 — Pipeline（无屏障）
+
+![T3 Pipeline 无屏障](assets/t3_pipeline_nobarrier.svg)
+
+每个单元独立穿过所有阶段，前一单元完成第 N 阶段后即可进入第 N+1 阶段，不等其他单元。阶段间无跨单元操作。
+
+### T4 — Pipeline + Barrier
+
+![T4 Pipeline + Barrier](assets/t4_pipeline_barrier.svg)
+
+阶段 1 并行完成后设屏障，在全部结果上做去重 / 排序 / 过滤等跨单元操作，再进入阶段 2。判据：阶段切换时是否必须拿到所有单元结果才能继续？是 → T4，否 → T3。
+
+### T5 — 循环发现
+
+![T5 循环发现](assets/t5_loop_dry.svg)
+
+数量未知，持续搜索直到连续 2 轮无新 key。agent 用 schema 返回结构化列表，对 key 字段去重而非全文匹配。budget 耗尽时优雅退出，已有结果不丢失。
+
+### T6 — 对抗验证
+
+![T6 对抗验证](assets/t6_adversarial_verify.svg)
+
+三个独立验证者并行尝试反驳结论，通过 schema 强制输出 `verdict: "pass"|"reject"`，在结构化字段而非自然语言上计票，≥2 票 pass 则通过。
+
+### T7 — 评判小组
+
+![T7 评判小组](assets/t7_judge_panel.svg)
+
+第一轮并行从多个视角生成方案，第二轮并行对各方案独立评审打分，最后由综合 agent 根据所有评审选出最优方案。
+
 ---
 
 ## 文件结构

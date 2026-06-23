@@ -1,0 +1,28 @@
+<svg width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .c-gray rect{fill:#f1efe8;stroke:#5f5e5a}
+  .c-purple rect{fill:#eeedfe;stroke:#534ab7}
+  .th{fill:#444441;font-size:14px;font-weight:500}
+  .ts{fill:#5f5e5a;font-size:12px;font-weight:400}
+  text{font-family:"Anthropic Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  line{fill:none;stroke:#73726c;stroke-width:1.5}
+</style>
+<title>T2 Fan-Out 各自输出</title>
+<desc>任务拆分为N个并行子任务，各自独立输出，不汇聚</desc>
+<defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g class="c-gray"><rect x="20" y="88" width="100" height="44" rx="8" stroke-width="0.5"/><text class="th" x="70" y="110" text-anchor="middle" dominant-baseline="central">任务输入</text></g>
+<line x1="120" y1="110" x2="148" y2="60" stroke-width="0.5" marker-end="url(#a1)"/>
+<line x1="120" y1="110" x2="148" y2="110" stroke-width="0.5" marker-end="url(#a1)"/>
+<line x1="120" y1="110" x2="148" y2="160" stroke-width="0.5" marker-end="url(#a1)"/>
+<g class="c-purple"><rect x="150" y="38" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="205" y="55" text-anchor="middle" dominant-baseline="central">agent 1</text><text class="ts" x="205" y="72" text-anchor="middle" dominant-baseline="central">处理单元 A</text></g>
+<g class="c-purple"><rect x="150" y="88" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="205" y="105" text-anchor="middle" dominant-baseline="central">agent 2</text><text class="ts" x="205" y="122" text-anchor="middle" dominant-baseline="central">处理单元 B</text></g>
+<g class="c-purple"><rect x="150" y="138" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="205" y="155" text-anchor="middle" dominant-baseline="central">agent 3</text><text class="ts" x="205" y="172" text-anchor="middle" dominant-baseline="central">处理单元 C</text></g>
+<text class="ts" x="290" y="60" text-anchor="middle" dominant-baseline="central">parallel()</text>
+<line x1="260" y1="60" x2="348" y2="60" stroke-width="0.5" marker-end="url(#a1)"/>
+<line x1="260" y1="110" x2="348" y2="110" stroke-width="0.5" marker-end="url(#a1)"/>
+<line x1="260" y1="160" x2="348" y2="160" stroke-width="0.5" marker-end="url(#a1)"/>
+<g class="c-gray"><rect x="350" y="38" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="405" y="55" text-anchor="middle" dominant-baseline="central">输出 A</text><text class="ts" x="405" y="72" text-anchor="middle" dominant-baseline="central">独立结果</text></g>
+<g class="c-gray"><rect x="350" y="88" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="405" y="105" text-anchor="middle" dominant-baseline="central">输出 B</text><text class="ts" x="405" y="122" text-anchor="middle" dominant-baseline="central">独立结果</text></g>
+<g class="c-gray"><rect x="350" y="138" width="110" height="44" rx="8" stroke-width="0.5"/><text class="th" x="405" y="155" text-anchor="middle" dominant-baseline="central">输出 C</text><text class="ts" x="405" y="172" text-anchor="middle" dominant-baseline="central">独立结果</text></g>
+<text class="ts" x="340" y="205" text-anchor="middle">适用：批量翻译、批量格式转换、各自独立不需要比较的任务</text>
+</svg>
