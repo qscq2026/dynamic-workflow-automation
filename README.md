@@ -21,7 +21,7 @@
 
 不需要你写脚本，不需要你确认脚本，描述任务就够了。
 
-![Dynamic Workflow Automation 架构图](dynamic_workflow_automation_architecture.svg)
+![Dynamic Workflow Automation 架构图](assets/dynamic_workflow_automation_architecture.svg)
 
 ---
 
