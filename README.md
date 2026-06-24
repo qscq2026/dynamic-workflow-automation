@@ -259,6 +259,23 @@ dynamic-workflow-automation 是**执行层**工具：跳过设计阶段，直接
 
 ---
 
+## 与 Boris Loop / Loop Engineering 的关系
+
+2026 年 6 月，Claude Code 创建者 **Boris Cherny** 宣告了从"写 prompt"到"写循环"的范式转变——agent 不再由人逐轮提示，而是在循环中自主运行，由独立的 evaluator 判断何时完成。Google 工程师 **Addy Osmani** 将其系统化为 **Loop Engineering**，提炼出 6 个构建模块（Automations、Worktrees、Skills、Connectors、Sub-agents、Memory）。
+
+本 skill 对应于 Boris 三层架构中的 **Layer 3（/batch + 动态 Workflow 集群）**，是 Workflow 运行时原语（`agent()` / `parallel()` / `pipeline()`）的模板化封装。其核心设计原则与 Boris Loop 一脉相承：
+
+| 本 skill 的概念 | 对应的 Boris / Loop Engineering 概念 |
+|:---------------|:-----------------------------------|
+| **T5 变体 C：Loop-Until-Evaluator** | 递归式终止——子 agent 判断完成与否，不靠硬编码条件 |
+| **T6 变体 B：多视角验证** | 写查分离——独立验证者从不同维度评估，不自我打分 |
+| **T5/T6 的 schema 结构化输出** | 可验证性——输出必须可被程序化检查，不依赖自然语言判断 |
+| **budget guard（预算保护）** | 成本意识——无限制循环比有限循环危险得多 |
+
+相比 Boris 的完整三层架构（本地 `/loop` + 云端 Routines + `/batch` Workflow），本 skill 仅聚焦第三层——集群级的动态 Workflow 脚本生成与执行。前两层的调度能力（时间驱动 / 云端持久化）依赖 Claude Code 原生命令（`/loop`、`/schedule`、Routines），与本 skill 互补，配合使用即可复现 Boris 三层飞轮。
+
+---
+
 ## License
 
 MIT
