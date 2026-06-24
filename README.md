@@ -237,7 +237,7 @@ dynamic-workflow-automation/
 
 ---
 
-## 与 loop-engine 的比较
+## 附1：与 loop-engine 的比较
 
 两个 skill 解决同一个问题域的不同层面，定位不互斥。
 
@@ -259,7 +259,7 @@ dynamic-workflow-automation 是**执行层**工具：跳过设计阶段，直接
 
 ---
 
-## 与 Boris Loop / Loop Engineering 的关系
+## 附二：与 Boris Loop / Loop Engineering 的关系
 
 2026 年 6 月，Claude Code 创建者 **Boris Cherny** 宣告了从"写 prompt"到"写循环"的范式转变——agent 不再由人逐轮提示，而是在循环中自主运行，由独立的 evaluator 判断何时完成。Google 工程师 **Addy Osmani** 将其系统化为 **Loop Engineering**，提炼出 6 个构建模块（Automations、Worktrees、Skills、Connectors、Sub-agents、Memory）。
 
